@@ -1,0 +1,85 @@
+package edu.wm.cs.cs301.slidingpuzzle;
+
+import java.util.Arrays;
+import java.util.Set;
+import java.util.PriorityQueue;
+
+import edu.wm.cs.cs301.slidingpuzzle.PuzzleState.Operation;
+
+public class AStarSolver implements PuzzleSolver {
+	
+	private int[] initialState;
+	private int[] finalState;
+	private int counter;
+	private PuzzleState curState;
+
+	@Override
+	public boolean configure(int[] initial, int[] goal) {
+		initialState = initial;
+		finalState = goal;
+		counter = 0;
+		return initial.length == goal.length; 
+	}
+	
+	private boolean CheckMember(Set<int[]> set, int[] state) {
+		for (int[] item: set) {
+			if (Arrays.equals(state, item)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private int mandist(int[] state, int[] finalstate) {
+		int count = 0;
+		int boardsize = (int) Math.sqrt(state.length);
+		for (int i = 0; i < state.length; i++) {
+			for (int j = 0; j < finalstate.length; j++) {
+				if (state[i] == finalstate[j]) {
+					count = (int) (count + Math.abs(Math.floor((state[i] - finalstate[j]) / boardsize) 
+							+ Math.abs((state[i] - finalstate[j]) % boardsize)));
+				}
+			}
+		}
+		return count;
+	}
+	
+	
+	@Override
+	public Operation[] movesToSolve() {
+		// TODO Auto-generated method stub
+		PriorityQueue<PuzzleState> q =  new PriorityQueue<PuzzleState>();
+		
+		
+		return null;
+	}
+
+	@Override
+	public PuzzleState getSolverInitialState() {
+		// TODO Auto-generated method stub
+		PuzzleState InitialState = new SimplePuzzleState();
+		InitialState.setState(initialState);
+		return InitialState;
+	}
+
+	@Override
+	public PuzzleState getSolverFinalState() {
+		// TODO Auto-generated method stub
+		PuzzleState FinalState = new SimplePuzzleState();
+		FinalState.setState(finalState);
+		return FinalState;
+	}
+
+	@Override
+	public int getNumberOfStatesExplored() {
+		// TODO Auto-generated method stub
+		return counter;
+	}
+
+	@Override
+	public int getMaxSizeOfQueue() {
+		// TODO Auto-generated method stub
+		return 10000;
+	}
+
+}

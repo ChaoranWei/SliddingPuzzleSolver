@@ -1,0 +1,158 @@
+package edu.wm.cs.cs301.slidingpuzzle;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Stack;
+import java.util.PriorityQueue;
+import java.util.Comparator;
+
+import edu.wm.cs.cs301.slidingpuzzle.PuzzleState.Operation;
+
+public class AStarSolver implements PuzzleSolver {
+	
+	private int[] initialState;
+	private static int[] finalState;
+	private int counter;
+	private PuzzleState curState;
+
+	@Override
+	public boolean configure(int[] initial, int[] goal) {
+		initialState = initial;
+		finalState = goal;
+		counter = 0;
+		return initial.length == goal.length; 
+	}
+	
+	private boolean CheckMember(Set<int[]> set, int[] state) {
+		for (int[] item: set) {
+			if (Arrays.equals(state, item)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public static Comparator<PuzzleState> Distance = new Comparator<PuzzleState>(){
+        
+        @Override
+        public int compare(PuzzleState c1, PuzzleState c2) {
+            return (int) (c1.getHeurisics() - c2.getHeurisics());
+        }
+
+    };
+    
+    private int[] setParameters(PuzzleState state) {
+		int count = 0;
+		PuzzleState temp = state;
+		while (temp.getParent() != null) {
+			temp = temp.getParent();
+			count++;
+		}
+		state.setDistance(count);
+		state.setFinal(finalState);
+	//	System.out.println(finalState);
+		return state.getFinal();
+	}
+
+	
+	@Override
+	public Operation[] movesToSolve() {
+		// TODO Auto-generated method stub
+		PriorityQueue<PuzzleState> q =  new PriorityQueue<PuzzleState>(Distance);
+		Set<int[]> garbage = new HashSet<int[]>();
+		Stack<Operation> OpList = new Stack<Operation>();
+		
+		curState = this.getSolverInitialState();
+		setParameters(curState);
+		//System.out.println(setParameters(curState));
+		System.out.println(curState.getHeurisics());
+		q.add(curState);
+		while (!q.isEmpty() ){//&& q.size() < this.getMaxSizeOfQueue()) {
+			curState = q.poll(); 
+			
+			if (!Arrays.equals(curState.getState(), this.getSolverFinalState().getState())) {
+				garbage.add(curState.getState());
+				if (curState.moveUp() != null) {
+				    if (!CheckMember(garbage, curState.moveUp().getState())) {
+				    	setParameters(curState.moveUp());
+				    	
+					    q.add(curState.moveUp());
+					    //garbage.add(curState.moveUp().getState());
+				    } //else {System.out.println('1');}
+				    
+				}
+				if (curState.moveDown() != null) {
+				    if (!CheckMember(garbage, curState.moveDown().getState())) {
+				    	setParameters(curState.moveDown());
+				    	q.add(curState.moveDown());
+				    	//garbage.add(curState.moveDown().getState());
+				    } //else {System.out.println('1');}
+				}
+				if (curState.moveRight() != null) {
+				    if (!CheckMember(garbage, curState.moveRight().getState())) {
+				    	setParameters(curState.moveRight());
+				    	q.add(curState.moveRight());
+				    	//garbage.add(curState.moveRight().getState());
+				    } //else {System.out.println('1');}
+				}
+				if (curState.moveLeft() != null) {
+					if (!CheckMember(garbage, curState.moveLeft().getState())) {
+						this.setParameters(curState.moveLeft());
+						q.add(curState.moveLeft());
+						//garbage.add(curState.moveLeft().getState());
+					} 
+				}
+			} else {
+				while (curState.getParent() != null) {
+					OpList.push(curState.getOperation());
+					curState = curState.getParent();
+				}
+				Operation[] OpArray = new Operation[OpList.size()];
+				int count = OpList.size();
+				for (Operation Op: OpList){
+					count--;
+					OpArray[count] = Op;
+					
+				}
+				//System.out.println(OpArray.length);
+				return OpArray;
+			}
+		}
+		return null;
+		
+	}
+
+	@Override
+	public PuzzleState getSolverInitialState() {
+		// TODO Auto-generated method stub
+		PuzzleState InitialState = new SimplePuzzleState();
+		InitialState.setState(initialState);
+		return InitialState;
+	}
+
+	@Override
+	public PuzzleState getSolverFinalState() {
+		// TODO Auto-generated method stub
+		PuzzleState FinalState = new SimplePuzzleState();
+		FinalState.setState(finalState);
+		return FinalState;
+	}
+
+	@Override
+	public int getNumberOfStatesExplored() {
+		// TODO Auto-generated method stub
+		return counter;
+	}
+
+	@Override
+	public int getMaxSizeOfQueue() {
+		// TODO Auto-generated method stub
+		return 10000;
+	}
+	
+
+}
+
+
+
